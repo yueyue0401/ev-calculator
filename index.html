@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>EV Charging Planner</title>
+    <title>Churd's CHR Charging Planner</title>
     <style>
       :root {
         color-scheme: dark;
@@ -158,10 +158,10 @@
         <div class="grid">
           <div class="field">
             <label for="currentBattery">Battery now (%)</label>
-            <input id="currentBattery" type="number" min="0" max="100" value="90" />
+            <input id="currentBattery" type="number" min="0" max="100" value="50" />
           </div>
           <div class="field">
-            <label for="milesPerPercent">Miles per 1% battery</label>
+            <label for="milesPerPercent">Miles per 1% battery (Toyota CHR is 2 mile per %)</label>
             <input id="milesPerPercent" type="number" step="0.1" value="2" />
           </div>
         </div>
@@ -188,8 +188,8 @@
                 <option value="12" selected>12</option>
               </select>
               <select id="startAmPm">
-                <option value="AM">AM</option>
-                <option value="PM" selected>PM</option>
+                <option value="AM" selected>AM</option>
+                <option value="PM">PM</option>
               </select>
             </div>
           </div>
@@ -203,16 +203,16 @@
                 <option value="4">4</option>
                 <option value="5">5</option>
                 <option value="6">6</option>
-                <option value="7">7</option>
+                <option value="7" selected>7</option>
                 <option value="8">8</option>
                 <option value="9">9</option>
                 <option value="10">10</option>
                 <option value="11">11</option>
-                <option value="12" selected>12</option>
+                <option value="12">12</option>
               </select>
               <select id="endAmPm">
-                <option value="AM">AM</option>
-                <option value="PM" selected>PM</option>
+                <option value="AM" selected>AM</option>
+                <option value="PM">PM</option>
               </select>
             </div>
           </div>
@@ -220,18 +220,18 @@
 
         <div class="grid">
           <div class="field">
-            <label for="chargeRate">Charging rate (% / hour)</label>
+            <label for="chargeRate">Charging rate (% / hour) (CHR is 1.5 with slow charger)</label>
             <input id="chargeRate" type="number" step="0.1" value="1.5" />
           </div>
           <div class="field">
-            <label for="batterySize">Battery size (kWh)</label>
+            <label for="batterySize">Battery size (kWh) (CHR is ~60 kWh)</label>
             <input id="batterySize" type="number" step="1" value="60" />
           </div>
           <div class="field">
             <label for="season">Rate season</label>
             <select id="season">
-              <option value="Summer">Summer (Jun 1–Sep 30)</option>
-              <option value="Winter" selected>Winter (Oct 1–May 31)</option>
+              <option value="Summer" selected>Summer (Jun 1–Sep 30)</option>
+              <option value="Winter">Winter (Oct 1–May 31)</option>
             </select>
           </div>
           <div class="field">
