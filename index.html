@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EV Charging Planner</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #07111f;
+        --panel: #101b2d;
+        --panel-2: #17263b;
+        --text: #f2f7ff;
+        --muted: #8da1bd;
+        --accent: #4fb3ff;
+        --accent-2: #7ce3b4;
+        --warning: #ffca68;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: linear-gradient(135deg, var(--bg), #16253b);
+        color: var(--text);
+        min-height: 100vh;
+      }
+
+      .container {
+        width: min(980px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 32px 0 48px;
+      }
+
+      h1 {
+        margin: 0 0 8px;
+        font-size: clamp(1.8rem, 3vw, 2.6rem);
+      }
+
+      .intro {
+        color: var(--muted);
+        margin: 0 0 24px;
+        max-width: 760px;
+        line-height: 1.6;
+      }
+
+      .card {
+        background: rgba(16, 27, 45, 0.92);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 18px;
+        padding: 20px;
+        box-shadow: 0 15px 45px rgba(0, 0, 0, 0.25);
+        margin-bottom: 18px;
+      }
+
+      .card h2 {
+        margin-top: 0;
+        font-size: 1.12rem;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+        margin-bottom: 12px;
+      }
+
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      label {
+        font-size: 0.95rem;
+        color: var(--muted);
+      }
+
+      input,
+      select,
+      button {
+        font: inherit;
+      }
+
+      input,
+      select {
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        background: var(--panel-2);
+        color: var(--text);
+      }
+
+      .time-row {
+        display: flex;
+        gap: 8px;
+      }
+
+      button {
+        border: none;
+        border-radius: 999px;
+        padding: 10px 16px;
+        background: linear-gradient(90deg, var(--accent), #3b8ecf);
+        color: white;
+        cursor: pointer;
+        font-weight: 600;
+      }
+
+      button:hover {
+        filter: brightness(1.06);
+      }
+
+      .result {
+        margin-top: 14px;
+        padding: 14px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        line-height: 1.65;
+      }
+
+      .pill {
+        display: inline-block;
+        padding: 4px 8px;
+        background: rgba(124, 227, 180, 0.14);
+        color: var(--accent-2);
+        border-radius: 999px;
+        margin-right: 6px;
+        font-size: 0.9rem;
+      }
+
+      .small {
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+
+      @media (max-width: 680px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="container">
+      <h1>EV Charging Planner</h1>
+      <p class="intro">
+        Estimate charging time, how much range you gain, how far you can still drive, and what the electricity should cost.
+        The defaults below use your rough EV assumptions: about 2 miles per 1% battery and roughly 1.5% per hour of slow charging.
+        Pricing is based on full PG&E EV2-A residential rates for San Francisco, which is the simplest way to model home charging costs.
+      </p>
+
+      <section class="card">
+        <h2>Current battery</h2>
+        <div class="grid">
+          <div class="field">
+            <label for="currentBattery">Battery now (%)</label>
+            <input id="currentBattery" type="number" min="0" max="100" value="90" />
+          </div>
+          <div class="field">
+            <label for="milesPerPercent">Miles per 1% battery</label>
+            <input id="milesPerPercent" type="number" step="0.1" value="2" />
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>1) Charge window estimate</h2>
+        <div class="grid">
+          <div class="field">
+            <label>Start time</label>
+            <div class="time-row">
+              <select id="startHour">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+                <option value="9">9</option>
+                <option value="10">10</option>
+                <option value="11">11</option>
+                <option value="12" selected>12</option>
+              </select>
+              <select id="startAmPm">
+                <option value="AM">AM</option>
+                <option value="PM" selected>PM</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label>End time</label>
+            <div class="time-row">
+              <select id="endHour">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+                <option value="9">9</option>
+                <option value="10">10</option>
+                <option value="11">11</option>
+                <option value="12" selected>12</option>
+              </select>
+              <select id="endAmPm">
+                <option value="AM">AM</option>
+                <option value="PM" selected>PM</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="field">
+            <label for="chargeRate">Charging rate (% / hour)</label>
+            <input id="chargeRate" type="number" step="0.1" value="1.5" />
+          </div>
+          <div class="field">
+            <label for="batterySize">Battery size (kWh)</label>
+            <input id="batterySize" type="number" step="1" value="60" />
+          </div>
+          <div class="field">
+            <label for="season">Rate season</label>
+            <select id="season">
+              <option value="Summer">Summer (Jun 1–Sep 30)</option>
+              <option value="Winter" selected>Winter (Oct 1–May 31)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="rateNote">Pricing note</label>
+            <select id="rateNote" disabled>
+              <option>Full PG&E-style bill pricing</option>
+            </select>
+          </div>
+        </div>
+        <p class="small">
+          Summer: off-peak $0.23/kWh, partial peak $0.43/kWh, peak $0.54/kWh. Winter: off-peak $0.23/kWh, partial peak $0.39/kWh, peak $0.41/kWh.
+          Many SF customers also see CleanPowerSF generation charges, but this calculator uses the full PG&E-style rates above.
+        </p>
+
+        <button type="button" onclick="calculateChargeWindow()">Calculate charging window</button>
+        <div id="chargeResult" class="result">Fill the times and press calculate.</div>
+      </section>
+
+      <section class="card">
+        <h2>2) How long can I still drive right now?</h2>
+        <button type="button" onclick="calculateDriveTime()">Estimate current range</button>
+        <div id="driveResult" class="result">Your current range will appear here.</div>
+      </section>
+
+      <section class="card">
+        <h2>3) What battery % do I need for a trip?</h2>
+        <div class="grid">
+          <div class="field">
+            <label for="tripMiles">Trip distance (miles)</label>
+            <input id="tripMiles" type="number" step="1" value="110" />
+          </div>
+        </div>
+        <button type="button" onclick="calculateNeededBattery()">Calculate required battery</button>
+        <div id="tripResult" class="result">Your required battery percentage will appear here.</div>
+      </section>
+    </main>
+
+    <script>
+      const milesPerPercentField = document.getElementById("milesPerPercent");
+
+      function toMinutes(hour, ampm) {
+        let h = Number(hour);
+        if (ampm === "PM" && h !== 12) h += 12;
+        if (ampm === "AM" && h === 12) h = 0;
+        return h * 60;
+      }
+
+      function toHoursBetween(startHour, startAmPm, endHour, endAmPm) {
+        let start = toMinutes(startHour, startAmPm);
+        let end = toMinutes(endHour, endAmPm);
+
+        if (end <= start) {
+          end += 24 * 60;
+        }
+
+        return (end - start) / 60;
+      }
+
+      function getRatePrice(minutes, season) {
+        const hour = (minutes / 60) % 24;
+        const isSummer = season === "Summer";
+
+        if (hour < 15) {
+          return 0.23;
+        }
+
+        if ((hour >= 15 && hour < 16) || hour >= 21) {
+          return isSummer ? 0.43 : 0.39;
+        }
+
+        return isSummer ? 0.54 : 0.41;
+      }
+
+      function estimateCostForWindow(durationHours, season, startHour, startAmPm) {
+        const stepMinutes = 30;
+        const totalChunks = Math.max(1, Math.round(durationHours * 2));
+        let totalCost = 0;
+        let startMinutes = toMinutes(startHour, startAmPm);
+
+        for (let i = 0; i < totalChunks; i += 1) {
+          const chunkMinutes = Math.min(stepMinutes, (durationHours * 60) - i * stepMinutes);
+          const chunkHours = chunkMinutes / 60;
+          const currentMinutes = startMinutes + i * stepMinutes;
+          const price = getRatePrice(currentMinutes, season);
+          totalCost += price * chunkHours;
+        }
+
+        return totalCost;
+      }
+
+      function calculateChargeWindow() {
+        const currentBattery = Number(document.getElementById("currentBattery").value);
+        const chargingRate = Number(document.getElementById("chargeRate").value);
+        const batterySize = Number(document.getElementById("batterySize").value);
+        const season = document.getElementById("season").value;
+        const startHour = document.getElementById("startHour").value;
+        const startAmPm = document.getElementById("startAmPm").value;
+        const endHour = document.getElementById("endHour").value;
+        const endAmPm = document.getElementById("endAmPm").value;
+
+        const durationHours = toHoursBetween(startHour, startAmPm, endHour, endAmPm);
+        const batteryGain = Math.min(100 - currentBattery, durationHours * chargingRate);
+        const newBattery = Math.min(100, currentBattery + batteryGain);
+        const milesPerPercent = Number(milesPerPercentField.value) || 2;
+        const milesAfterCharge = newBattery * milesPerPercent;
+        const kWhNeeded = (batteryGain / 100) * batterySize;
+        const estimatedCost = estimateCostForWindow(durationHours, season, startHour, startAmPm);
+
+        const result = document.getElementById("chargeResult");
+        result.innerHTML = `
+          <span class="pill">${durationHours.toFixed(1)} hrs</span>
+          <span class="pill">+${batteryGain.toFixed(1)}% battery</span>
+          <span class="pill">~${milesAfterCharge.toFixed(0)} miles range</span>
+          <br /><br />
+          Starting at <strong>${currentBattery}%</strong>, charging for <strong>${durationHours.toFixed(1)} hours</strong> should add about <strong>${batteryGain.toFixed(1)}%</strong>.
+          That would bring the battery to about <strong>${newBattery.toFixed(1)}%</strong> and give you roughly <strong>${milesAfterCharge.toFixed(0)} miles</strong> of driving range.<br />
+          Estimated energy used: <strong>${kWhNeeded.toFixed(1)} kWh</strong>.<br />
+          Estimated electricity cost: <strong>$${estimatedCost.toFixed(2)}</strong> using the selected <strong>${season}</strong> PG&E EV2-A pricing window.
+        `;
+      }
+
+      function calculateDriveTime() {
+        const currentBattery = Number(document.getElementById("currentBattery").value);
+        const milesPerPercent = Number(milesPerPercentField.value) || 2;
+        const milesRemaining = currentBattery * milesPerPercent;
+
+        const result = document.getElementById("driveResult");
+        result.innerHTML = `
+          At <strong>${currentBattery}% battery</strong>, the car should be able to drive about <strong>${milesRemaining.toFixed(0)} miles</strong> more.
+          If you want to express that as a charging-time estimate, that is roughly <strong>${(currentBattery / 1.5).toFixed(1)} hours</strong> of slow charging at your assumed rate.
+        `;
+      }
+
+      function calculateNeededBattery() {
+        const milesPerPercent = Number(milesPerPercentField.value) || 2;
+        const tripMiles = Number(document.getElementById("tripMiles").value);
+        const neededBattery = (tripMiles / milesPerPercent).toFixed(1);
+
+        const result = document.getElementById("tripResult");
+        result.innerHTML = `
+          To drive <strong>${tripMiles} miles</strong> at about <strong>${milesPerPercent} miles per 1%</strong> battery, you would need about <strong>${neededBattery}% battery</strong>.
+          That is roughly <strong>${(tripMiles / 2).toFixed(1)}%</strong> using the earlier rule-of-thumb from your notes.
+        `;
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        calculateDriveTime();
+        calculateNeededBattery();
+      });
+    </script>
+  </body>
+</html>
