@@ -70,6 +70,51 @@
         margin-bottom: 8px;
       }
 
+      .pixel-scene {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        height: 110px;
+        margin: 0 -28px 24px;
+        overflow: hidden;
+        pointer-events: none;
+      }
+
+      .pixel-road {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, transparent 36%, rgba(0, 0, 0, 0.08) 42%, rgba(0, 0, 0, 0.06) 44%, transparent 100%);
+        background-repeat: no-repeat;
+      }
+
+      .pixel-road::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 22px;
+        height: 22px;
+        background: linear-gradient(180deg, transparent 0%, rgba(255, 255, 255, 0.12) 22%, transparent 60%);
+      }
+
+      .pixel-car {
+        position: absolute;
+        left: 8px;
+        bottom: 6px;
+        height: 70px;
+        width: auto;
+        transform-origin: left bottom;
+        transform: translateX(0);
+        transition: transform 120ms linear;
+      }
+
+      .pixel-car img {
+        display: block;
+        height: 100%;
+        width: auto;
+      }
+
       .card {
         background: var(--surface);
         border: 1px solid var(--border);
@@ -267,6 +312,11 @@
     </style>
   </head>
   <body>
+    <div class="pixel-scene">
+      <div class="pixel-road">
+        <img id="pixelCar" class="pixel-car" src="car.png" alt="Toyotat CHR" />
+      </div>
+    </div>
     <main class="container">
       <h1>Churd's CHR Charging Planner</h1>
       <div class="intro">
@@ -407,6 +457,9 @@
             <label for="priceMilesPerPercent">Miles per 1% battery (CHR is about 1.5 miles per %)</label>
             <input id="priceMilesPerPercent" type="number" step="0.1" value="1.5" />
           </div>
+        </div>
+        <div class="small">
+          <p>Note: section 4 shows energy cost per battery percentage and per mile. Charging speed (1% per hour on the slow charger) affects how long it takes, not the per-% energy cost.</p>
         </div>
         <button type="button" onclick="calculatePricePerPercent()">Calculate price</button>
         <div id="priceResult" class="result">Enter your battery size and range assumptions, then click calculate.</div>
@@ -569,10 +622,27 @@
         });
       }
 
+      function updatePixelCar() {
+        const pixelCar = document.getElementById("pixelCar");
+        if (!pixelCar) return;
+
+        const scrollTop = window.scrollY;
+        const maxScroll = document.body.scrollHeight - window.innerHeight;
+        const progress = maxScroll > 0 ? Math.min(1, scrollTop / maxScroll) : 0;
+        const trackWidth = Math.max(0, window.innerWidth - 180);
+        const x = Math.round(progress * trackWidth);
+
+        pixelCar.style.transform = `translateX(${x}px)`;
+      }
+
+      window.addEventListener("scroll", updatePixelCar);
+      window.addEventListener("resize", updatePixelCar);
+
       document.addEventListener("DOMContentLoaded", () => {
         calculateDriveTime();
         calculateNeededBattery();
         attachButtonClickAnimations();
+        updatePixelCar();
       });
     </script>
   </body>
