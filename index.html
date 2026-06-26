@@ -50,13 +50,24 @@
       }
 
       .intro {
-        color: var(--text);
+        color: #ffffff;
         margin: 0 0 28px;
         max-width: 760px;
         line-height: 1.75;
         opacity: 0;
         animation: fadeInUp 0.7s ease forwards;
         animation-delay: 0.05s;
+      }
+
+      .intro ul {
+        margin: 12px 0 0;
+        padding-left: 20px;
+        list-style: disc;
+        color: #ffffff;
+      }
+
+      .intro li {
+        margin-bottom: 8px;
       }
 
       .card {
@@ -175,13 +186,30 @@
         line-height: 1.8;
       }
 
+      .result p,
+      .result ul {
+        margin: 0 0 12px;
+        padding: 0;
+      }
+
+      .result ul {
+        padding-left: 20px;
+      }
+
+      .result li {
+        margin-bottom: 10px;
+        line-height: 1.6;
+      }
+
       .pill {
-        display: inline-block;
+        display: inline-flex;
+        align-items: center;
         padding: 6px 12px;
         background: rgba(255, 239, 145, 0.4);
         color: var(--accent-strong);
         border-radius: 999px;
         margin-right: 8px;
+        margin-bottom: 8px;
         font-size: 0.92rem;
         font-weight: 600;
         animation: pulseGlow 4s ease-in-out infinite alternate;
@@ -228,11 +256,14 @@
   <body>
     <main class="container">
       <h1>Churd's CHR Charging Planner</h1>
-      <p class="intro">
-        Get a quick feel for charging time, range added, and what it should cost to top up before you head out.
-        These defaults are based on a chill Bay Area EV vibe: about 2 miles per 1% battery and around 1.5% per hour on a slow charger.
-        The cost estimate uses PG&E EV2-A style residential pricing for San Francisco so it stays simple and useful.
-      </p>
+      <div class="intro">
+        <p>Get a quick feel for charging time, range added, and what it should cost to top up before you head out.</p>
+        <ul>
+          <li>Based on a chill Bay Area EV vibe</li>
+          <li>Uses about 2 miles per 1% battery and ~1.5% per hour of slow charging</li>
+          <li>Estimates cost with PG&E EV2-A residential pricing for San Francisco</li>
+        </ul>
+      </div>
 
       <section class="card">
         <h2>Current battery</h2>
@@ -322,10 +353,13 @@
             </select>
           </div>
         </div>
-        <p class="small">
-          Summer: off-peak $0.23/kWh, partial peak $0.43/kWh, peak $0.54/kWh. Winter: off-peak $0.23/kWh, partial peak $0.39/kWh, peak $0.41/kWh.
-          Many SF customers also see CleanPowerSF generation charges, but this calculator uses the full PG&E-style rates above.
-        </p>
+        <div class="small">
+          <ul>
+            <li>Summer: ~$0.23/kWh off-peak, $0.43/kWh partial peak, $0.54/kWh peak.</li>
+            <li>Winter: ~$0.23/kWh off-peak, $0.39/kWh partial peak, $0.41/kWh peak.</li>
+            <li>Some SF customers also pay CleanPowerSF generation charges, but this calculator uses full PG&E-style energy rates for simplicity.</li>
+          </ul>
+        </div>
 
         <button type="button" onclick="calculateChargeWindow()">Check charge plan</button>
         <div id="chargeResult" class="result">Fill the times and press calculate.</div>
@@ -423,14 +457,17 @@
 
         const result = document.getElementById("chargeResult");
         result.innerHTML = `
-          <span class="pill">${durationHours.toFixed(1)} hrs</span>
-          <span class="pill">+${batteryGain.toFixed(1)}% battery</span>
-          <span class="pill">~${milesAfterCharge.toFixed(0)} miles range</span>
-          <br /><br />
-          Starting at <strong>${currentBattery}%</strong>, charging for <strong>${durationHours.toFixed(1)} hours</strong> should add about <strong>${batteryGain.toFixed(1)}%</strong>.
-          That would bring the battery to about <strong>${newBattery.toFixed(1)}%</strong> and give you roughly <strong>${milesAfterCharge.toFixed(0)} miles</strong> of driving range.<br />
-          Estimated energy used: <strong>${kWhNeeded.toFixed(1)} kWh</strong>.<br />
-          Estimated electricity cost: <strong>$${estimatedCost.toFixed(2)}</strong> using the selected <strong>${season}</strong> PG&E EV2-A pricing window.
+          <div class="result-summary">
+            <span class="pill">${durationHours.toFixed(1)} hrs</span>
+            <span class="pill">+${batteryGain.toFixed(1)}% battery</span>
+            <span class="pill">~${milesAfterCharge.toFixed(0)} miles</span>
+          </div>
+          <ul>
+            <li>Starting at <strong>${currentBattery}%</strong>, charging for <strong>${durationHours.toFixed(1)} hours</strong> should add <strong>${batteryGain.toFixed(1)}%</strong>.</li>
+            <li>That brings the battery to about <strong>${newBattery.toFixed(1)}%</strong> and gives roughly <strong>${milesAfterCharge.toFixed(0)} miles</strong> of range.</li>
+            <li>Estimated energy used: <strong>${kWhNeeded.toFixed(1)} kWh</strong>.</li>
+            <li>Estimated cost: <strong>$${estimatedCost.toFixed(2)}</strong> using <strong>${season}</strong> PG&E EV2-A.</li>
+          </ul>
         `;
       }
 
@@ -441,8 +478,10 @@
 
         const result = document.getElementById("driveResult");
         result.innerHTML = `
-          At <strong>${currentBattery}% battery</strong>, the car should be able to drive about <strong>${milesRemaining.toFixed(0)} miles</strong> more.
-          If you want to express that as a charging-time estimate, that is roughly <strong>${(currentBattery / 1.5).toFixed(1)} hours</strong> of slow charging at your assumed rate.
+          <ul>
+            <li>At <strong>${currentBattery}% battery</strong>, the car should be able to drive about <strong>${milesRemaining.toFixed(0)} miles</strong> more.</li>
+            <li>If you want to express that as a charging-time estimate, that is roughly <strong>${(currentBattery / 1.5).toFixed(1)} hours</strong> of slow charging at your assumed rate.</li>
+          </ul>
         `;
       }
 
@@ -453,8 +492,10 @@
 
         const result = document.getElementById("tripResult");
         result.innerHTML = `
-          To drive <strong>${tripMiles} miles</strong> at about <strong>${milesPerPercent} miles per 1%</strong> battery, you would need about <strong>${neededBattery}% battery</strong>.
-          That is roughly <strong>${(tripMiles / 2).toFixed(1)}%</strong> using the earlier rule-of-thumb from your notes.
+          <ul>
+            <li>To drive <strong>${tripMiles} miles</strong> at about <strong>${milesPerPercent} miles per 1%</strong> battery, you would need about <strong>${neededBattery}% battery</strong>.</li>
+            <li>That is roughly <strong>${(tripMiles / 2).toFixed(1)}%</strong> using the earlier rule of thumb from your notes.</li>
+          </ul>
         `;
       }
 
