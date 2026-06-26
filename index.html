@@ -4,17 +4,21 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Churd's CHR Charging Planner</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
     <style>
       :root {
-        color-scheme: dark;
-        --bg: #07111f;
-        --panel: #101b2d;
-        --panel-2: #17263b;
-        --text: #f2f7ff;
-        --muted: #8da1bd;
-        --accent: #4fb3ff;
-        --accent-2: #7ce3b4;
-        --warning: #ffca68;
+        color-scheme: light;
+        --bg-1: #9AD872;
+        --bg-2: #468432;
+        --surface: rgba(255, 255, 255, 0.95);
+        --surface-strong: #F9F3D6;
+        --text: #1f3a1b;
+        --muted: #4f6f2f;
+        --accent: #FFA02E;
+        --accent-strong: #E27E1F;
+        --border: rgba(70, 132, 50, 0.2);
       }
 
       * {
@@ -23,55 +27,58 @@
 
       body {
         margin: 0;
-        font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        background: linear-gradient(135deg, var(--bg), #16253b);
+        font-family: "Roboto", Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: #4f9238;
         color: var(--text);
         min-height: 100vh;
       }
 
       .container {
-        width: min(980px, calc(100% - 32px));
+        width: min(980px, calc(100% - 36px));
         margin: 0 auto;
-        padding: 32px 0 48px;
+        padding: 40px 0 56px;
       }
 
       h1 {
-        margin: 0 0 8px;
-        font-size: clamp(1.8rem, 3vw, 2.6rem);
+        margin: 0 0 10px;
+        font-size: clamp(2.2rem, 3vw, 3.2rem);
+        letter-spacing: -0.04em;
+        color: #12220f;
       }
 
       .intro {
-        color: var(--muted);
-        margin: 0 0 24px;
+        color: var(--text);
+        margin: 0 0 28px;
         max-width: 760px;
-        line-height: 1.6;
+        line-height: 1.75;
       }
 
       .card {
-        background: rgba(16, 27, 45, 0.92);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 18px;
-        padding: 20px;
-        box-shadow: 0 15px 45px rgba(0, 0, 0, 0.25);
-        margin-bottom: 18px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 28px;
+        padding: 28px;
+        box-shadow: 0 20px 40px rgba(70, 132, 50, 0.12);
+        margin-bottom: 24px;
       }
 
       .card h2 {
         margin-top: 0;
-        font-size: 1.12rem;
+        font-size: 1.18rem;
+        color: var(--text);
       }
 
       .grid {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 14px;
-        margin-bottom: 12px;
+        gap: 18px;
+        margin-bottom: 16px;
       }
 
       .field {
         display: flex;
         flex-direction: column;
-        gap: 6px;
+        gap: 10px;
       }
 
       label {
@@ -87,59 +94,71 @@
 
       input,
       select {
-        padding: 10px 12px;
-        border-radius: 10px;
-        border: 1px solid rgba(255, 255, 255, 0.14);
-        background: var(--panel-2);
+        padding: 14px 16px;
+        border-radius: 16px;
+        border: 1px solid rgba(70, 132, 50, 0.18);
+        background: var(--surface-strong);
         color: var(--text);
+      }
+
+      select {
+        appearance: none;
       }
 
       .time-row {
         display: flex;
-        gap: 8px;
+        gap: 10px;
       }
 
       button {
         border: none;
         border-radius: 999px;
-        padding: 10px 16px;
-        background: linear-gradient(90deg, var(--accent), #3b8ecf);
-        color: white;
+        padding: 13px 18px;
+        background: var(--accent);
+        color: var(--text);
         cursor: pointer;
-        font-weight: 600;
+        font-weight: 700;
+        transition: transform 180ms ease, box-shadow 180ms ease, filter 180ms ease;
       }
 
       button:hover {
-        filter: brightness(1.06);
+        transform: translateY(-1px);
+        box-shadow: 0 16px 30px rgba(255, 160, 46, 0.24);
       }
 
       .result {
-        margin-top: 14px;
-        padding: 14px;
-        border-radius: 12px;
-        background: rgba(255, 255, 255, 0.04);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        line-height: 1.65;
+        margin-top: 18px;
+        padding: 18px;
+        border-radius: 20px;
+        background: rgba(70, 132, 50, 0.08);
+        border: 1px solid rgba(70, 132, 50, 0.16);
+        color: var(--text);
+        line-height: 1.8;
       }
 
       .pill {
         display: inline-block;
-        padding: 4px 8px;
-        background: rgba(124, 227, 180, 0.14);
-        color: var(--accent-2);
+        padding: 6px 12px;
+        background: rgba(255, 239, 145, 0.4);
+        color: var(--accent-strong);
         border-radius: 999px;
-        margin-right: 6px;
-        font-size: 0.9rem;
+        margin-right: 8px;
+        font-size: 0.92rem;
+        font-weight: 600;
       }
 
       .small {
         color: var(--muted);
-        font-size: 0.9rem;
+        font-size: 0.92rem;
       }
 
       @media (max-width: 680px) {
         .grid {
           grid-template-columns: 1fr;
+        }
+
+        .card {
+          padding: 24px;
         }
       }
     </style>
