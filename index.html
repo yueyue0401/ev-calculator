@@ -273,7 +273,7 @@
         <p>Get a quick feel for charging time, range added, and what it should cost to top up before you head out.</p>
         <ul>
           <li>Based on a chill Bay Area EV vibe</li>
-          <li>Uses about 2 miles per 1% battery and ~1.5% per hour of slow charging</li>
+          <li>Uses about 15 miles per 10% battery and ~1% per hour from a house slow charger</li>
           <li>Estimates cost with PG&E EV2-A residential pricing for San Francisco</li>
         </ul>
       </div>
@@ -286,8 +286,8 @@
             <input id="currentBattery" type="number" min="0" max="100" value="50" />
           </div>
           <div class="field">
-            <label for="milesPerPercent">Miles per 1% battery (Toyota CHR is 2 mile per %)</label>
-            <input id="milesPerPercent" type="number" step="0.1" value="2" />
+            <label for="milesPerPercent">Miles per 1% battery (CHR is about 1.5 miles per % / 10% ≈ 15 miles)</label>
+            <input id="milesPerPercent" type="number" step="0.1" value="1.5" />
           </div>
         </div>
       </section>
@@ -345,8 +345,8 @@
 
         <div class="grid">
           <div class="field">
-            <label for="chargeRate">Charging rate (% / hour) (CHR is about 2 with slow charger)</label>
-            <input id="chargeRate" type="number" step="0.1" value="2" />
+            <label for="chargeRate">Charging rate (% / hour) (CHR slow charger is about 1% per hour)</label>
+            <input id="chargeRate" type="number" step="0.1" value="1" />
           </div>
           <div class="field">
             <label for="batterySize">Battery size (kWh) (CHR is ~60 kWh)</label>
@@ -404,8 +404,8 @@
             <input id="priceBatterySize" type="number" step="1" value="60" />
           </div>
           <div class="field">
-            <label for="priceMilesPerPercent">Miles per 1% battery</label>
-            <input id="priceMilesPerPercent" type="number" step="0.1" value="2" />
+            <label for="priceMilesPerPercent">Miles per 1% battery (CHR is about 1.5 miles per %)</label>
+            <input id="priceMilesPerPercent" type="number" step="0.1" value="1.5" />
           </div>
         </div>
         <button type="button" onclick="calculatePricePerPercent()">Calculate price</button>
@@ -479,7 +479,7 @@
         const durationHours = toHoursBetween(startHour, startAmPm, endHour, endAmPm);
         const batteryGain = Math.min(100 - currentBattery, durationHours * chargingRate);
         const newBattery = Math.min(100, currentBattery + batteryGain);
-        const milesPerPercent = Number(milesPerPercentField.value) || 2;
+        const milesPerPercent = Number(milesPerPercentField.value) || 1.5;
         const milesAfterCharge = newBattery * milesPerPercent;
         const kWhNeeded = (batteryGain / 100) * batterySize;
         const estimatedCost = estimateCostForWindow(durationHours, season, startHour, startAmPm);
@@ -502,20 +502,22 @@
 
       function calculateDriveTime() {
         const currentBattery = Number(document.getElementById("currentBattery").value);
-        const milesPerPercent = Number(milesPerPercentField.value) || 2;
+        const milesPerPercent = Number(milesPerPercentField.value) || 1.5;
+        const chargeRate = Number(document.getElementById("chargeRate").value) || 1;
         const milesRemaining = currentBattery * milesPerPercent;
+        const hoursToCharge = chargeRate > 0 ? (currentBattery / chargeRate) : 0;
 
         const result = document.getElementById("driveResult");
         result.innerHTML = `
           <ul>
             <li>At <strong>${currentBattery}% battery</strong>, the car should be able to drive about <strong>${milesRemaining.toFixed(0)} miles</strong> more.</li>
-            <li>If you want to express that as a charging-time estimate, that is roughly <strong>${(currentBattery / 1.5).toFixed(1)} hours</strong> of slow charging at your assumed rate.</li>
+            <li>That is roughly <strong>${hoursToCharge.toFixed(1)} hours</strong> of charging at <strong>${chargeRate}%/hr</strong> from a slow household charger.</li>
           </ul>
         `;
       }
 
       function calculateNeededBattery() {
-        const milesPerPercent = Number(milesPerPercentField.value) || 2;
+        const milesPerPercent = Number(milesPerPercentField.value) || 1.5;
         const tripMiles = Number(document.getElementById("tripMiles").value);
         const neededBattery = (tripMiles / milesPerPercent).toFixed(1);
 
@@ -523,14 +525,14 @@
         result.innerHTML = `
           <ul>
             <li>To drive <strong>${tripMiles} miles</strong> at about <strong>${milesPerPercent} miles per 1%</strong> battery, you would need about <strong>${neededBattery}% battery</strong>.</li>
-            <li>That is roughly <strong>${(tripMiles / 2).toFixed(1)}%</strong> using the earlier rule of thumb from your notes.</li>
+            <li>That is roughly <strong>${(tripMiles / 1.5).toFixed(1)}%</strong> using the CHR house slow charger rule of thumb.</li>
           </ul>
         `;
       }
 
       function calculatePricePerPercent() {
         const batterySize = Number(document.getElementById("priceBatterySize").value) || 60;
-        const miles = Number(document.getElementById("priceMilesPerPercent").value) || 2;
+        const miles = Number(document.getElementById("priceMilesPerPercent").value) || 1.5;
         const prices = {
           Summer: { offPeak: 0.23, peak: 0.54 },
           Winter: { offPeak: 0.23, peak: 0.41 },
