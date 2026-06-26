@@ -382,6 +382,22 @@
         <button type="button" onclick="calculateNeededBattery()">See needed battery</button>
         <div id="tripResult" class="result">Your required battery percentage will appear here.</div>
       </section>
+
+      <section class="card">
+        <h2>4) Summer/Winter price per % and per mile</h2>
+        <div class="grid">
+          <div class="field">
+            <label for="priceBatterySize">Battery size (kWh)</label>
+            <input id="priceBatterySize" type="number" step="1" value="60" />
+          </div>
+          <div class="field">
+            <label for="priceMilesPerPercent">Miles per 1% battery</label>
+            <input id="priceMilesPerPercent" type="number" step="0.1" value="2" />
+          </div>
+        </div>
+        <button type="button" onclick="calculatePricePerPercent()">Calculate price</button>
+        <div id="priceResult" class="result">Enter your battery size and range assumptions, then click calculate.</div>
+      </section>
     </main>
 
     <script>
@@ -495,6 +511,35 @@
           <ul>
             <li>To drive <strong>${tripMiles} miles</strong> at about <strong>${milesPerPercent} miles per 1%</strong> battery, you would need about <strong>${neededBattery}% battery</strong>.</li>
             <li>That is roughly <strong>${(tripMiles / 2).toFixed(1)}%</strong> using the earlier rule of thumb from your notes.</li>
+          </ul>
+        `;
+      }
+
+      function calculatePricePerPercent() {
+        const batterySize = Number(document.getElementById("priceBatterySize").value) || 60;
+        const miles = Number(document.getElementById("priceMilesPerPercent").value) || 2;
+        const prices = {
+          Summer: { offPeak: 0.23, peak: 0.54 },
+          Winter: { offPeak: 0.23, peak: 0.41 },
+        };
+
+        const sections = [
+          { label: "Summer peak", price: prices.Summer.peak },
+          { label: "Summer off-peak", price: prices.Summer.offPeak },
+          { label: "Winter peak", price: prices.Winter.peak },
+          { label: "Winter off-peak", price: prices.Winter.offPeak },
+        ];
+
+        const result = document.getElementById("priceResult");
+        result.innerHTML = `
+          <ul>
+            ${sections
+              .map((item) => {
+                const pricePerPercent = (item.price * batterySize) / 100;
+                const pricePerMile = pricePerPercent / miles;
+                return `<li><strong>${item.label}:</strong> $${pricePerPercent.toFixed(3)}/% and $${pricePerMile.toFixed(3)}/mile</li>`;
+              })
+              .join("")}
           </ul>
         `;
       }
